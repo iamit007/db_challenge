@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: AccountsService</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.db.awmd.challenge.service</a> ]
+</div>
+
+<h1>Coverage Summary for Class: AccountsService (com.db.awmd.challenge.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AccountsService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/ 6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.7%
+  </span>
+  <span class="absValue">
+    (22/ 23)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.db.awmd.challenge.service;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.db.awmd.challenge.domain.Account;
+<i>4</i>&nbsp;import com.db.awmd.challenge.domain.TransactionInputDetails;
+<i>5</i>&nbsp;import com.db.awmd.challenge.exception.DuplicateAccountIdException;
+<i>6</i>&nbsp;import com.db.awmd.challenge.exception.InsufficientFundsException;
+<i>7</i>&nbsp;import com.db.awmd.challenge.repository.AccountsRepository;
+<i>8</i>&nbsp;import lombok.Getter;
+<i>9</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>10</i>&nbsp;import org.springframework.http.HttpStatus;
+<i>11</i>&nbsp;import org.springframework.http.ResponseEntity;
+<i>12</i>&nbsp;import org.springframework.scheduling.annotation.Async;
+<i>13</i>&nbsp;import org.springframework.stereotype.Service;
+<i>14</i>&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;import java.math.BigDecimal;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;@Service
+<i>19</i>&nbsp;public class AccountsService {
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;    @Getter
+<i>22</i>&nbsp;    private final AccountsRepository accountsRepository;
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;    @Getter
+<i>25</i>&nbsp;    private final TransactionInputDetails transactionInputDetails;
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;    @Autowired
+<b class="fc"><i>28</i>&nbsp;    public AccountsService(AccountsRepository accountsRepository, TransactionInputDetails transactionInputDetails) {</b>
+<b class="fc"><i>29</i>&nbsp;        this.accountsRepository = accountsRepository;</b>
+<b class="fc"><i>30</i>&nbsp;        this.transactionInputDetails = transactionInputDetails;</b>
+<b class="fc"><i>31</i>&nbsp;    }</b>
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;    @Getter
+<i>34</i>&nbsp;    public Account account;
+<i>35</i>&nbsp;
+<i>36</i>&nbsp;    public void createAccount(Account account) {
+<b class="fc"><i>37</i>&nbsp;        this.accountsRepository.createAccount(account);</b>
+<b class="fc"><i>38</i>&nbsp;    }</b>
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;    public Account getAccount(String accountId) {
+<b class="fc"><i>41</i>&nbsp;        return this.accountsRepository.getAccount(accountId);</b>
+<i>42</i>&nbsp;    }
+<i>43</i>&nbsp;
+<b class="fc"><i>44</i>&nbsp;    private static long uniqueTransactionId = 0;</b>
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;    //    It will handle multiple calls but the transfer will be synchronized
+<i>47</i>&nbsp;    @Async
+<i>48</i>&nbsp;    public ResponseEntity&lt;Object&gt; transferAmount(@RequestBody TransactionInputDetails transactionInputDetails) {
+<i>49</i>&nbsp;
+<b class="fc"><i>50</i>&nbsp;        String transferDescription = null; //will be used for sending email notification</b>
+<b class="fc"><i>51</i>&nbsp;        String accountFromId = transactionInputDetails.getAccountFromId();</b>
+<b class="fc"><i>52</i>&nbsp;        String accountToId = transactionInputDetails.getAccountToId();</b>
+<b class="fc"><i>53</i>&nbsp;        BigDecimal amountToTransfer = transactionInputDetails.getAmountToTransfer();</b>
+<b class="fc"><i>54</i>&nbsp;        BigDecimal accountFromIdbalance = accountsRepository.getAccount(accountFromId).getBalance();</b>
+<i>55</i>&nbsp;
+<b class="fc"><i>56</i>&nbsp;        if (accountToId.equals(accountFromId)) {</b>
+<b class="nc"><i>57</i>&nbsp;            throw new DuplicateAccountIdException(&quot;Accounts&quot; + transactionInputDetails.getAccountToId() + &quot;and&quot; + transactionInputDetails.getAccountFromId() + &quot; cannot be same!&quot;);</b>
+<b class="fc"><i>58</i>&nbsp;        } else if (accountsRepository.getAccount(accountFromId).getBalance().compareTo(amountToTransfer) &lt;= 0) {</b>
+<b class="fc"><i>59</i>&nbsp;            throw new InsufficientFundsException(&quot;Transaction Declined: Transfer Amount should always be less than the balance amount of &quot; + accountFromId);</b>
+<i>60</i>&nbsp;        } else {
+<b class="fc"><i>61</i>&nbsp;            synchronized (this) {</b>
+<b class="fc"><i>62</i>&nbsp;                accountFromIdbalance = accountFromIdbalance.subtract(amountToTransfer);</b>
+<b class="fc"><i>63</i>&nbsp;            }</b>
+<i>64</i>&nbsp;        }
+<b class="fc"><i>65</i>&nbsp;        transferDescription = &quot;Transaction of INR &quot; + amountToTransfer + &quot; successful with Transaction ID: &quot; + getUniqueTransactionId() + &quot;  Remaining balance is &quot; + accountFromIdbalance;</b>
+<b class="fc"><i>66</i>&nbsp;        return new ResponseEntity&lt;&gt;(HttpStatus.ACCEPTED);</b>
+<i>67</i>&nbsp;    }
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;    //To get Unique Transaction Id
+<i>70</i>&nbsp;    private static synchronized String getUniqueTransactionId() {
+<b class="fc"><i>71</i>&nbsp;        return String.valueOf(uniqueTransactionId++);</b>
+<i>72</i>&nbsp;    }
+<i>73</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-03 18:39</div>
+</div>
+</body>
+</html>

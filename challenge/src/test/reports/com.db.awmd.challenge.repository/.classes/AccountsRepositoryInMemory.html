@@ -1,0 +1,117 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: AccountsRepositoryInMemory</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.db.awmd.challenge.repository</a> ]
+</div>
+
+<h1>Coverage Summary for Class: AccountsRepositoryInMemory (com.db.awmd.challenge.repository)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AccountsRepositoryInMemory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/ 10)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.db.awmd.challenge.repository;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.db.awmd.challenge.domain.Account;
+<i>4</i>&nbsp;import com.db.awmd.challenge.exception.DuplicateAccountIdException;
+<i>5</i>&nbsp;import org.springframework.stereotype.Repository;
+<i>6</i>&nbsp;
+<i>7</i>&nbsp;import java.util.Map;
+<i>8</i>&nbsp;import java.util.concurrent.ConcurrentHashMap;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;@Repository
+<b class="fc"><i>11</i>&nbsp;public class AccountsRepositoryInMemory implements AccountsRepository {</b>
+<i>12</i>&nbsp;
+<b class="fc"><i>13</i>&nbsp;    private final Map&lt;String, Account&gt; accounts = new ConcurrentHashMap&lt;&gt;();</b>
+<i>14</i>&nbsp;
+<i>15</i>&nbsp;    @Override
+<i>16</i>&nbsp;    public void createAccount(Account account) throws DuplicateAccountIdException {
+<b class="fc"><i>17</i>&nbsp;        Account previousAccount = accounts.putIfAbsent(account.getAccountId(), account);</b>
+<b class="fc"><i>18</i>&nbsp;        if (previousAccount != null) {</b>
+<b class="fc"><i>19</i>&nbsp;            throw new DuplicateAccountIdException(</b>
+<b class="fc"><i>20</i>&nbsp;                    &quot;Account id &quot; + account.getAccountId() + &quot; already exists!&quot;);</b>
+<i>21</i>&nbsp;        }
+<b class="fc"><i>22</i>&nbsp;    }</b>
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;    @Override
+<i>25</i>&nbsp;    public Account getAccount(String accountId) {
+<b class="fc"><i>26</i>&nbsp;        return accounts.get(accountId);</b>
+<i>27</i>&nbsp;    }
+<i>28</i>&nbsp;
+<i>29</i>&nbsp;    @Override
+<i>30</i>&nbsp;    public void clearAccounts() {
+<b class="fc"><i>31</i>&nbsp;        accounts.clear();</b>
+<b class="fc"><i>32</i>&nbsp;    }</b>
+<i>33</i>&nbsp;
+<i>34</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-03 18:39</div>
+</div>
+</body>
+</html>
